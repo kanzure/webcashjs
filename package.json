@@ -1,6 +1,6 @@
 {
   "name": "webcash",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Webcash for javascript/typescript",
   "main": "index.js",
   "scripts": {
