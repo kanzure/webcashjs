@@ -1,0 +1,40 @@
+{
+  "name": "webcash",
+  "version": "1.0.0",
+  "description": "Webcash for javascript/typescript",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kanzure/webcashjs.git"
+  },
+  "keywords": [
+    "webcash",
+    "e-cash",
+    "digital-currency"
+  ],
+  "author": "Bryan Bishop <kanzure@gmail.com>",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/kanzure/webcashjs/issues"
+  },
+  "homepage": "https://github.com/kanzure/webcashjs#readme",
+  "devDependencies": {
+    "@types/jest": "^27.4.1",
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.3",
+    "typescript": "^4.6.2",
+    "typings": "^2.1.1"
+  },
+  "dependencies": {
+    "@types/crypto-js": "^4.1.1",
+    "create-hash": "^1.2.0",
+    "cross-fetch": "^3.1.5",
+    "crypto-js": "^4.1.1",
+    "decimal.js": "^10.3.1",
+    "regenerator-runtime": "^0.13.9"
+  }
+}
