@@ -493,7 +493,7 @@ export class WebcashWallet {
             type: "insert",
             amount: new_webcash.amount.toString(),
             webcash: webcash.toString(),
-            new_webcash: webcash.toString(),
+            new_webcash: new_webcash_str,
             memo: memo,
         })
 
