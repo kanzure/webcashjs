@@ -55,9 +55,9 @@ test("test function for validating amount has at most 8 decimal places", () => {
     expect(validateAmountDecimals("100000000.0000000")).toBe(true);
     expect(validateAmountDecimals("100000000.00000000")).toBe(true);
 
-    expect(validateAmountDecimals("1.000000001")).toBe(false);
-    expect(validateAmountDecimals("1.0000000001")).toBe(false);
-    expect(validateAmountDecimals("1.000000000000999999999")).toBe(false);
+    expect(() => validateAmountDecimals("1.000000001")).toThrow(RangeError);
+    expect(() => validateAmountDecimals("1.0000000001")).toThrow(RangeError);
+    expect(() => validateAmountDecimals("1.000000000000999999999")).toThrow(RangeError);
 });
 
 test("convert decimal amount to string", () => {
@@ -122,6 +122,9 @@ test("secret and public webcash", () => {
     expect(swc.toPublic().amount).toEqual(new Decimal(1));
     expect(swc.toPublic().hashed_value).toEqual("32549bff6d8404c4d121b589f4d24ac6416ed48c25163e1f08d92d67ca0bb0b3");
     expect(swc.toPublic().amount).toEqual(swc.amount);
+
+    expect(() => new SecretWebcash(new Decimal("3.123456789"), "feedbeef")).toThrow(RangeError);
+    expect(() => new PublicWebcash(new Decimal("3.123456789"), "feedbeef")).toThrow(RangeError);
 });
 
 test("public webcash deserializer", () => {
