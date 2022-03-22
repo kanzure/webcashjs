@@ -242,7 +242,7 @@ export class SecretWebcash {
     // If you need to deserialize webcash, then use deserializeWebcash to
     // create instantiated objects. Here, we only accept the direct parameters.
     constructor(amount: Decimal, secret_value: string) {
-        // TODO: check that the amount uses no more than the maximum number of decimal places
+        validateAmountDecimals(amount)
         this.amount = amount
         this.secret_value = secret_value
     }
@@ -292,7 +292,7 @@ export class PublicWebcash {
     hashed_value: string
 
     constructor(amount: Decimal, hashed_value: string) {
-        // TODO: check that the amount uses no more than the maximum number of decimal places
+        validateAmountDecimals(amount)
         this.amount = amount
         this.hashed_value = hashed_value
     }
