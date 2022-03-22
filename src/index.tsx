@@ -99,7 +99,7 @@ export function validateAmountDecimals(amount: Decimal | string) {
     if (amount.decimalPlaces() <= 8) {
         return true;
     } else {
-        return false;
+        throw new RangeError("Amount precision should be at most 8 decimals.");
     }
 }
 
