@@ -495,6 +495,7 @@ export class WebcashWallet {
             webcash: webcash.toString(),
             new_webcash: new_webcash_str,
             memo: memo,
+            timestamp: Date.now().toString(),
         })
 
         // TODO: save the wallet!!!
