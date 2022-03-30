@@ -74,6 +74,10 @@ test("parse amount from string", () => {
     expect(parseAmountFromString("e500")).toEqual(new Decimal(500));
     expect(parseAmountFromString("e1.05")).toEqual(new Decimal("1.05"));
 
+    expect(parseAmountFromString("e0.00000001")).toEqual(new Decimal("1E-8"));
+    expect(parseAmountFromString("e1E-8")).toEqual(new Decimal("1E-8"));
+    expect(parseAmountFromString("e1e-8")).toEqual(new Decimal("1E-8")); // See PR comment
+
     expect(parseAmountFromString("100:secret:feedbeef")).toEqual(new Decimal(100));
     expect(parseAmountFromString("e100:secret:feedbeef")).toEqual(new Decimal(100));
 

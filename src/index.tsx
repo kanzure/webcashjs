@@ -122,28 +122,11 @@ export function stringAmountToDecimal(amount: string) {
 export function parseAmountFromString(amount_raw: string): Decimal {
     // If there is a colon in the value, then the amount is going to be on the
     // left hand side.
-    const part1 = amount_raw.split(":")[0]
-
-    // There can be at most one 'e' in the value, at the beginning.
-    const count = part1.split("e").length - 1
-    if (count == 0) {
-        return new Decimal(part1)
-    } else if (count <= 1) {
-        // should be at the beginning
-        if (part1[0] == "e") {
-            // there needs to be an actual amount
-            if (part1 != "e") {
-                const part2 = part1.split("e")[1]
-                return new Decimal(part2)
-            } else {
-                throw new Error("Invalid amount format for webcash.")
-            }
-        } else {
-            throw new Error("Invalid amount format for webcash.")
-        }
-    } else {
-        throw new Error("Invalid amount format for webcash.")
+    var amount = amount_raw.split(":")[0]
+    if (amount[0] === 'e') {
+        amount = amount.slice(1);
     }
+    return new Decimal(amount);
 }
 
 // Take any kind of webcash and instantiate an object with the values specified
