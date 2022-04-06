@@ -87,7 +87,7 @@ const HEALTHCHECK_API = () => {
 
 // deterministic wallets should not use this function
 export function createWebcashWithRandomSecretFromAmount(amount: Decimal): string {
-    return `e${amount.toString()}:secret:${generateRandomValue(32)}`
+    return `e${decimalAmountToString(amount)}:secret:${generateRandomValue(32)}`
 }
 
 // Check that the amount has no more than a maximum number of decimal places.
@@ -110,7 +110,7 @@ export function decimalAmountToString(amount: Decimal) {
     if (amount == null) {
         return "?"
     } else {
-        return amount.toString()
+        return amount.toFixed(8)
     }
 }
 
@@ -278,7 +278,7 @@ export class SecretWebcash {
     }
 
     toString(): string {
-        return `e${this.amount.toString()}:secret:${this.secret_value}`
+        return `e${decimalAmountToString(this.amount)}:secret:${this.secret_value}`
     }
 
     toPublic() {
@@ -324,7 +324,7 @@ export class PublicWebcash {
     }
 
     toString(): string {
-        return `e${this.amount.toString()}:public:${this.hashed_value}`
+        return `e${decimalAmountToString(this.amount)}:public:${this.hashed_value}`
     }
 }
 
@@ -491,7 +491,7 @@ export class WebcashWallet {
         this.webcash.push(new_webcash.toString())
         this.log.push({
             type: "insert",
-            amount: new_webcash.amount.toString(),
+            amount: decimalAmountToString(new_webcash.amount),
             webcash: webcash.toString(),
             new_webcash: new_webcash_str,
             memo: memo,
@@ -559,7 +559,7 @@ export class WebcashWallet {
             }, new Decimal(0))
 
         let changeAmount = new Decimal(foundAmount)
-        changeAmount = changeAmount.minus(amount.toString())
+        changeAmount = changeAmount.minus(decimalAmountToString(amount))
         // TODO: does minus take a string parameter??
 
         let changeWebcash
@@ -627,7 +627,7 @@ export class WebcashWallet {
 
             this.log.push({
                 type: "change",
-                amount: changeAmount.toString(),
+                amount: decimalAmountToString(changeAmount),
                 webcash: changeWebcash.toString(),
                 timestamp: Date.now().toString(),
             })
@@ -636,7 +636,7 @@ export class WebcashWallet {
         // record payment
         this.log.push({
             type: "payment",
-            amount: transferWebcash.amount.toString(),
+            amount: decimalAmountToString(transferWebcash.amount),
             webcash: transferWebcash.toString(),
             memo: memo,
             timestamp: Date.now().toString(),
@@ -806,10 +806,10 @@ export class WebcashWallet {
                                     let swc = check_webcashes[public_webcash.hashed_value]
                                     swc.amount = new Decimal(result["amount"])
                                     if (chainCode !== "PAY" && !this.webcash.includes(swc.toString())) {
-                                        console.log("Recovered webcash: ", swc.amount.toString())
+                                        console.log("Recovered webcash: ", decimalAmountToString(swc.amount))
                                         this.webcash.push(swc.toString())
                                     } else {
-                                        console.log("Found known webcash of amount: ", swc.amount.toString())
+                                        console.log("Found known webcash of amount: ", decimalAmountToString(swc.amount))
                                     }
                                 }
                             }
