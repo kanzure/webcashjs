@@ -61,8 +61,9 @@ test("test function for validating amount has at most 8 decimal places", () => {
 });
 
 test("convert decimal amount to string", () => {
-    expect(decimalAmountToString(new Decimal("1.0"))).toBe("1");
-    expect(decimalAmountToString(new Decimal("1.099"))).toBe("1.099");
+    expect(decimalAmountToString(new Decimal("1.0"))).toBe("1.00000000");
+    expect(decimalAmountToString(new Decimal("1.099"))).toBe("1.09900000");
+    expect(decimalAmountToString(new Decimal("0.00000010"))).toBe("0.00000010");
 });
 
 test("string amount to decimal", () => {
@@ -96,6 +97,36 @@ test("deserialize webcash", () => {
 
     expect(deserializeWebcash("e1:public:feedbeef").amount).toEqual(new Decimal(1));
     expect(deserializeWebcash("e100:public:feedbeef").amount).toEqual(new Decimal(100));
+});
+
+test("test (de)serialization of webcash with small amounts", () => {
+    const expectations = [
+        { val: new Decimal(1E-8),
+          in:  "e1E-8:secret:feedbeef",
+          out: "e0.00000001:secret:feedbeef"
+        },
+        { val: new Decimal(1E-8),
+          in:  "e0.00000001:secret:feedbeef",
+          out: "e0.00000001:secret:feedbeef"
+        },
+        { val: new Decimal(1E-6),
+          in:  "e1E-6:secret:feedbeef",
+          out: "e0.00000100:secret:feedbeef"
+        },
+        { val: new Decimal(1E-6),
+          in:  "e0.00000100:secret:feedbeef",
+          out: "e0.00000100:secret:feedbeef"
+        },
+        { val: new Decimal(100.001),
+          in:  "e100.00100000:secret:feedbeef",
+          out: "e100.00100000:secret:feedbeef"
+        },
+    ];
+    expectations.map((ex) => {
+        let swc = deserializeWebcash(String(ex.in));
+        expect(swc.toString()).toEqual(ex.out);
+        expect(swc.amount).toEqual(ex.val);
+    });
 });
 
 // Careful when using createWebcashWithRandomSecretFromAmount, it doesn't use
@@ -138,11 +169,11 @@ test("secret webcash deserializer", () => {
 });
 
 test("public webcash toString", () => {
-    expect((new PublicWebcash(new Decimal(1), "feedbeef")).toString()).toEqual("e1:public:feedbeef");
+    expect((new PublicWebcash(new Decimal(1), "feedbeef")).toString()).toEqual("e1.00000000:public:feedbeef");
 });
 
 test("secret webcash toString", () => {
-    expect((new SecretWebcash(new Decimal(1), "feedbeef")).toString()).toEqual("e1:secret:feedbeef");
+    expect((new SecretWebcash(new Decimal(1), "feedbeef")).toString()).toEqual("e1.00000000:secret:feedbeef");
 });
 
 test("webcash wallet constructor", () => {
@@ -240,6 +271,17 @@ test("wallet insert and pay (live)", async () => {
     //expect(wallet.walletdepths["PAY"]).toEqual(3);
 });
 
+// test("wallet insert and pay with tiny amounts (live)", async () => {
+//     let wallet = new WebcashWallet();
+//     wallet.setLegalAgreementsToTrue()
+//     let secret = 'e0.00000010:secret:__REPLACE_WITH_UNSPENT_SECRET__';
+//     let result = await wallet.insert(secret);
+//     console.log("Balance:", wallet.getBalance());
+//     expect(wallet.getBalance()).toEqual(new Decimal(1E-7));
+//     let payback = await wallet.pay(1E-7);
+//     console.log("Payback:", payback);
+// });
+
 test("check webcash in wallet", async () => {
     let wallet = new WebcashWallet({"master_secret": "6fc3d1b067646ea749e4001e05c757c491b351424ae998339d6341d7a18e12d4"});
     wallet.setLegalAgreementsToTrue();
@@ -270,20 +312,20 @@ test("check webcash in wallet", async () => {
 test("processHealthcheckResults", () => {
     let wallet = new WebcashWallet({"master_secret": "6fc3d1b067646ea749e4001e05c757c491b351424ae998339d6341d7a18e12d4"});
     wallet.setLegalAgreementsToTrue();
-    wallet.webcash.push("e15:secret:13c62ea73d555409a880cadc6270f896bf1e429d4776a2251cd13f6fd76b1b15");
-    wallet.webcash.push("e6:secret:218f09ba86bfe622f52950dbbe3f0d9c7c464f1705039b476d2408d407d08cea");
+    wallet.webcash.push("e15.00000000:secret:13c62ea73d555409a880cadc6270f896bf1e429d4776a2251cd13f6fd76b1b15");
+    wallet.webcash.push("e6.00000000:secret:218f09ba86bfe622f52950dbbe3f0d9c7c464f1705039b476d2408d407d08cea");
     expect(wallet.getBalance()).toEqual(new Decimal(21));
 
     let webcashesMap = {
-        "155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": "e15:secret:13c62ea73d555409a880cadc6270f896bf1e429d4776a2251cd13f6fd76b1b15",
-        "760779899e2386bc3b164aa3f56e4dea4d11bd95d4e5f755cb53da9c72c72bfe": "e6:secret:218f09ba86bfe622f52950dbbe3f0d9c7c464f1705039b476d2408d407d08cea",
+        "155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": "e15.00000000:secret:13c62ea73d555409a880cadc6270f896bf1e429d4776a2251cd13f6fd76b1b15",
+        "760779899e2386bc3b164aa3f56e4dea4d11bd95d4e5f755cb53da9c72c72bfe": "e6.00000000:secret:218f09ba86bfe622f52950dbbe3f0d9c7c464f1705039b476d2408d407d08cea",
     };
 
     // make up a scenario where the server says the amount is different
     let results = {
-        //"e15:public:155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": {"spent": false, "amount": "15"},
-        "e20:public:155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": {"spent": false, "amount": "20"},
-        "e6:public:760779899e2386bc3b164aa3f56e4dea4d11bd95d4e5f755cb53da9c72c72bfe": {"spent": false, "amount": "6"},
+        //"e15:public:155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": {"spent": false, "amount": "15.00000000"},
+        "e20.00000000:public:155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": {"spent": false, "amount": "20.00000000"},
+        "e6.00000000:public:760779899e2386bc3b164aa3f56e4dea4d11bd95d4e5f755cb53da9c72c72bfe": {"spent": false, "amount": "6.00000000"},
     };
 
     wallet.processHealthcheckResults(results, webcashesMap);
@@ -294,17 +336,17 @@ test("processHealthcheckResults", () => {
     // let's test it again, this time the amount error is in the wallet
     let wallet2 = new WebcashWallet({"master_secret": "6fc3d1b067646ea749e4001e05c757c491b351424ae998339d6341d7a18e12d4"});
     wallet2.setLegalAgreementsToTrue();
-    wallet2.webcash.push("e20:secret:13c62ea73d555409a880cadc6270f896bf1e429d4776a2251cd13f6fd76b1b15");
-    wallet2.webcash.push("e6:secret:218f09ba86bfe622f52950dbbe3f0d9c7c464f1705039b476d2408d407d08cea");
+    wallet2.webcash.push("e20.00000000:secret:13c62ea73d555409a880cadc6270f896bf1e429d4776a2251cd13f6fd76b1b15");
+    wallet2.webcash.push("e6.00000000:secret:218f09ba86bfe622f52950dbbe3f0d9c7c464f1705039b476d2408d407d08cea");
 
     let webcashesMap2 = {
-        "155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": "e20:secret:13c62ea73d555409a880cadc6270f896bf1e429d4776a2251cd13f6fd76b1b15",
-        "760779899e2386bc3b164aa3f56e4dea4d11bd95d4e5f755cb53da9c72c72bfe": "e6:secret:218f09ba86bfe622f52950dbbe3f0d9c7c464f1705039b476d2408d407d08cea",
+        "155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": "e20.00000000:secret:13c62ea73d555409a880cadc6270f896bf1e429d4776a2251cd13f6fd76b1b15",
+        "760779899e2386bc3b164aa3f56e4dea4d11bd95d4e5f755cb53da9c72c72bfe": "e6.00000000:secret:218f09ba86bfe622f52950dbbe3f0d9c7c464f1705039b476d2408d407d08cea",
     };
 
     let results2 = {
-        "e15:public:155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": {"spent": false, "amount": "15"},
-        "e6:public:760779899e2386bc3b164aa3f56e4dea4d11bd95d4e5f755cb53da9c72c72bfe": {"spent": false, "amount": "6"},
+        "e15.00000000:public:155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": {"spent": false, "amount": "15.00000000"},
+        "e6.00000000:public:760779899e2386bc3b164aa3f56e4dea4d11bd95d4e5f755cb53da9c72c72bfe": {"spent": false, "amount": "6.00000000"},
     };
 
     wallet2.processHealthcheckResults(results2, webcashesMap2);
@@ -312,12 +354,12 @@ test("processHealthcheckResults", () => {
 
     // now try removal
     let webcashesMap3 = {
-        "155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": "e15:secret:13c62ea73d555409a880cadc6270f896bf1e429d4776a2251cd13f6fd76b1b15",
-        "760779899e2386bc3b164aa3f56e4dea4d11bd95d4e5f755cb53da9c72c72bfe": "e6:secret:218f09ba86bfe622f52950dbbe3f0d9c7c464f1705039b476d2408d407d08cea",
+        "155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": "e15.00000000:secret:13c62ea73d555409a880cadc6270f896bf1e429d4776a2251cd13f6fd76b1b15",
+        "760779899e2386bc3b164aa3f56e4dea4d11bd95d4e5f755cb53da9c72c72bfe": "e6.00000000:secret:218f09ba86bfe622f52950dbbe3f0d9c7c464f1705039b476d2408d407d08cea",
     }
     let results3 = {
-        "e15:public:155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": {"spent": true, "amount": "15"},
-        "e6:public:760779899e2386bc3b164aa3f56e4dea4d11bd95d4e5f755cb53da9c72c72bfe": {"spent": false, "amount": "6"},
+        "e15.00000000:public:155191994c768836d5447b6e7897e27192829ec6ec8b725495a68b48c69e4236": {"spent": true, "amount": "15.00000000"},
+        "e6.00000000:public:760779899e2386bc3b164aa3f56e4dea4d11bd95d4e5f755cb53da9c72c72bfe": {"spent": false, "amount": "6.00000000"},
     };
     wallet2.processHealthcheckResults(results3, webcashesMap3);
     expect(wallet2.getBalance()).toEqual(new Decimal(6));
