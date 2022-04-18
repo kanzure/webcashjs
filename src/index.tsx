@@ -110,7 +110,12 @@ export function decimalAmountToString(amount: Decimal) {
     if (amount == null) {
         return "?"
     } else {
-        return amount.toFixed(8)
+        if (amount.isInteger()) {
+            return amount.toString();
+        } else {
+            const amount_str = amount.toFixed(8); // force 8 decimals
+            return amount_str.replace(/\.?0+$/, ''); // trim any trailing zeros
+        }
     }
 }
 
