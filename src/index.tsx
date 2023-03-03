@@ -740,10 +740,14 @@ export class WebcashWallet {
         }
     }
 
-    public async recover(gaplimit: number = 20): Promise<void> {
+    public async recover(gaplimit: number = 20, sweep_payments: boolean = false): Promise<void> {
         // gaplimit is the maximum window span that will be used, on the
         // assumption that any valid webcash will be found within the last item
         // plus gaplimit number more of the secrets.
+
+        // sweep_payments indicates whether to sweep all webcash from pending
+        // payments. It is disabled by default because in theory these are
+        // payments meant for someone else.
 
         // Start by healthchecking the contents of the wallet.
         await this.check()
@@ -810,10 +814,13 @@ export class WebcashWallet {
                                 if (result["spent"] === false) {
                                     let swc = check_webcashes[public_webcash.hashed_value]
                                     swc.amount = new Decimal(result["amount"])
-                                    if (chainCode !== "PAY" && !this.webcash.includes(swc.toString())) {
+                                    if ((sweep_payments || chainCode !== "PAY") && !this.webcash.includes(swc.toString())) {
                                         console.log("Recovered webcash: ", decimalAmountToString(swc.amount))
                                         this.webcash.push(swc.toString())
                                     } else {
+                                        // payments are not swept by default.
+                                        // Also, this can be reached when cash
+                                        // already in the wallet is found too
                                         console.log("Found known webcash of amount: ", decimalAmountToString(swc.amount))
                                     }
                                 }
