@@ -1,6 +1,6 @@
 {
   "name": "webcash",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Webcash for javascript/typescript",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
